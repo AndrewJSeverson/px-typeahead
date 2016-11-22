@@ -8,6 +8,7 @@
 <link rel="import" href="../iron-icons/iron-icons.html">
 <link rel="import" href="../iron-resizable-behavior/iron-resizable-behavior.html">
 <link rel="import" href="../px-polymer-font-awesome/polymer-font-awesome.html" />
+<link rel="import" href="lodash-loader.html" />
 
 <!--
 
@@ -59,9 +60,9 @@ Custom property | Description | Default
       <div class="container" >
         <ul class="layout__item" id="searchResults">
           <template is="dom-repeat" items="[[_boldResults(_suggestions.*, inputValue)]]">
-             <li tabindex="-1" on-tap="_select" on-mouseover="_onhover"
-             on-keyup="_keyup" class="u-p--">
-             [[item.prefix]]<span class="bold">[[item.highlight]]</span>[[item.suffix]]
+            <li tabindex="-1" on-tap="_select" on-mouseover="_onhover"
+            on-keyup="_keyup" class="u-p--">
+            [[item.prefix]]<span class="bold">[[item.highlight]]</span>[[item.suffix]]
             </li>
           </template>
         </ul>
@@ -179,6 +180,14 @@ Custom property | Description | Default
       searchTerm: {
         type: String,
         value: ''
+      },
+      isJson: {
+        type: Boolean,
+        value: false
+      },
+      displayProperty: {
+        type: String,
+        value: ''
       }
     },
     behaviors: [Polymer.IronResizableBehavior],
@@ -258,16 +267,18 @@ Custom property | Description | Default
      */
     _select: function(e) {
         var selectedItem = e.currentTarget,
-            text = selectedItem.textContent.trim();
+            text = selectedItem.textContent.trim(),
+            model = e.model,
+            value = model.get('item.value');
 
         this.$.search.focus();
         this.set('inputValue',text);
+        this.set('inputObject', value);
         this.async(function() {
           this.set('_suggestions',[]);
         },100);
 
-
-        this.fire('px-typeahead-item-selected',this.inputValue);
+        this.fire('px-typeahead-item-selected',this.inputObject);
         e.stopPropagation();
 
     },
@@ -337,6 +348,7 @@ Custom property | Description | Default
       }
 
       this.set('inputValue',selectedItem.textContent.trim());
+      this.set('inputObject', value);
       this.async(function() {
         this.set('_suggestions',[]);
       }, 100);
@@ -376,16 +388,29 @@ Custom property | Description | Default
     },
     _localCandidatesSearch: function(term) {
       var matched = [];
+      var _self = this;
 
       matched = this.localCandidates.filter(function(candidate) {
-        return candidate.trim().toLowerCase().indexOf(term.trim().toLowerCase()) > -1;
+        if(_self.isJson){
+          var match = false;
+          _.each(candidate, function(value){
+            if(value !== null & value !== undefined){
+              value = (typeof value === 'object' || typeof value === 'array')? JSON.stringify(value).replace(/[\[\\{\}]]+/, '') : value;
+              if(_.includes(value.toUpperCase(), term.trim().toUpperCase())){
+                match = true;
+              }
+            }
+          });
+          return match;
+        } else{
+          return candidate.trim().toLowerCase().indexOf(term.trim().toLowerCase()) > -1;
+        }
       });
       return matched;
     },
     _prefetchedCandidatesSearch: function(term) {
-      var matched = [];
+      
           matched = this._prefetchedCandidates.filter(function(candidate) {
-            return candidate.trim().toLowerCase().indexOf(term.trim().toLowerCase()) > -1;
           });
       return matched;
     },
@@ -425,15 +450,30 @@ Custom property | Description | Default
       return matched;
     },
     _boldResults: function(items, term) {
-      var resultsList = items.base.map(function(fullString) {
+      var _self = this;
+      var resultsList = items.base.map(function(fullItem) {
+        var fullString = '';
+        if(_self.isJson){
+          fullString = fullItem[_self.displayProperty];
+        } else{
+          fullString = fullItem;
+        }
         var termLocation = fullString.trim().toLowerCase().indexOf(term.trim().toLowerCase());
           if (termLocation > -1) {
             return {
-            prefix: fullString.trim().substr(0, termLocation),
-            highlight: fullString.trim().substr(termLocation, term.length),
-            suffix: fullString.trim().substr(termLocation+ term.length)
-          };
-        }
+              prefix: fullString.trim().substr(0, termLocation),
+              highlight: fullString.trim().substr(termLocation, term.length),
+              suffix: fullString.trim().substr(termLocation+ term.length),
+              value: fullItem
+            };
+          } else{
+            return {
+              prefix: fullString,
+              highlight: '',
+              suffix: '',
+              value: fullItem
+            }
+          }
       });
       resultsList = resultsList.filter(function(result) {
         return result !== "undefined";
