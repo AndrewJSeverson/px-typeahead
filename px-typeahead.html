@@ -52,7 +52,7 @@ Custom property | Description | Default
 
     <div class$="[[_calculateParentDivClass(inputFocused)]]" tabindex="0" id="mainContainer">
       <div style="flex:0 1 99%;"><input id="search" class="search u-pl--" disabled$="[[disabled]]"
-      on-keyup="_keyup" on-keydown="_keydown" placeholder="{{placeholder}}" value="{{inputValue::input}}" on-focus="_onfocus" on-blur="_onblur" onchange="_onchange"></input>
+      on-keyup="_keyup" on-keydown="_keydown" placeholder="{{placeholder}}" value="{{inputValue::input}}" on-focus="_onfocus" on-blur="_onblur"></input>
       </div>
       <div style="flex:0 0 1%;"><iron-icon icon="fa:fa-search"></i></div>
     </div>
@@ -262,7 +262,7 @@ Custom property | Description | Default
      * 
      * 
      */
-    _onchange: function(e){
+    _onchange: function(){
       this.fire('px-typeahead-changed',this.inputValue);
     },
     /**
@@ -490,6 +490,7 @@ Custom property | Description | Default
       return resultsList;
     },
     _search:function(term){
+      this._onchange();
       this.debounce('search', function() {
         var matched = [],
         resultListUl,
