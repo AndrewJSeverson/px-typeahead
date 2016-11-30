@@ -52,7 +52,7 @@ Custom property | Description | Default
 
     <div class$="[[_calculateParentDivClass(inputFocused)]]" tabindex="0" id="mainContainer">
       <div style="flex:0 1 99%;"><input id="search" class="search u-pl--" disabled$="[[disabled]]"
-      on-keyup="_keyup" on-keydown="_keydown" placeholder="{{placeholder}}" value="{{inputValue::input}}" on-focus="_onfocus" on-blur="_onblur"></input>
+      on-keyup="_keyup" on-keydown="_keydown" placeholder="{{placeholder}}" value="{{inputValue::input}}" on-focus="_onfocus" on-blur="_onblur" onchange="_onchange"></input>
       </div>
       <div style="flex:0 0 1%;"><iron-icon icon="fa:fa-search"></i></div>
     </div>
@@ -256,6 +256,15 @@ Custom property | Description | Default
       }
       e.currentTarget.classList.add('item-selected');
     },
+    /**
+     * Fired whenever a search value is changed
+     * @event changed
+     * 
+     * 
+     */
+    _onchange: function(e){
+      this.fire('px-typeahead-changed',this.inputValue);
+    }
     /**
      * Fired whenever an item is selected.
      * @event px-typeahead-item-selected
