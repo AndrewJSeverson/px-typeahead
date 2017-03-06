@@ -344,25 +344,12 @@ Custom property | Description | Default
     //  this.set('inputValue',selectedItem.textContent.trim());
     },
     _enterPress: function(e) {
-      var alreadySelected,
-          selectedItem,
-          suggestionsMenu,
-          children;
+      
+      var itemSelectedOnEnter
+      itemSelectedOnEnter = Polymer.dom(this.root).querySelector('.item-selected');
 
-      alreadySelected = Polymer.dom(this.root).querySelector('.item-selected');
-
-      if (alreadySelected){
-        selectedItem = alreadySelected;
-        selectedItem.classList.remove('item-selected');
-      }
-
-      this.set('inputValue',selectedItem.textContent.trim());
-      this.set('inputObject', value);
-      this.async(function() {
-        this.set('_suggestions',[]);
-      }, 100);
-      this.fire('px-typeahead-item-selected',selectedItem);
-      Polymer.dom(this.root).querySelector('input').focus();
+      // click item to trigger click event
+      itemSelectedOnEnter.click();
     },
     _backspacePress: function(e) {
 
