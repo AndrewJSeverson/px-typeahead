@@ -390,7 +390,7 @@ Custom property | Description | Default
           _.each(candidate, function(value){
             if(value !== null & value !== undefined){
               value = (typeof value === 'object' || typeof value === 'array')? JSON.stringify(value).replace(/[\[\\{\}]]+/, '') : value;
-              if(_.includes(value.toUpperCase(), term.trim().toUpperCase())){
+              if((typeof value === 'string') && _.includes(value.toUpperCase(), term.trim().toUpperCase())){
                 match = true;
               }
             }
